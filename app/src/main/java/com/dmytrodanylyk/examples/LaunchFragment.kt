@@ -14,9 +14,9 @@ import kotlinx.coroutines.CoroutineDispatcher
 
 class LaunchFragment : Fragment() {
 
-    private val uiDispatcher: CoroutineDispatcher = Dispatchers.Main
     private val dataProvider = DataProvider()
-    private lateinit var job: Job
+    private var job: Job = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + job)
 
     companion object {
         const val TAG = "LaunchFragment"
@@ -24,7 +24,6 @@ class LaunchFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        job = Job()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -42,7 +41,7 @@ class LaunchFragment : Fragment() {
         job.cancel()
     }
 
-    private fun loadData() = GlobalScope.launch(uiDispatcher + job) {
+    private fun loadData() = uiScope.launch {
         showLoading() // ui thread
 
         val result = dataProvider.loadData() // non ui thread, suspend until finished
